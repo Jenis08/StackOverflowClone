@@ -60,7 +60,7 @@ export const profile = (req, res) => {
 
 export const logout = (req, res) => {
     res.cookie('token', '').json({
-        message: `Logout Success`,
+        message: `Logout Successfull`,
         success: true
     });
 };

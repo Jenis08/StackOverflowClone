@@ -47,7 +47,7 @@ export const updateQuestion = async (req, res) => {
     });
 };
 
-export const deleteQuestion = (req, res) => {
+export const deleteQuestion = async (req, res) => {
     const { token } = req.cookies;
     jwt.verify(token, process.env.JWT_SECRET, {}, async (err, info) => {
         if (err) throw err;
@@ -68,7 +68,7 @@ export const deleteQuestion = (req, res) => {
                 message: 'Question deleted',
                 success: true
             });
-        }catch(e){
+        } catch (e) {
             return res.status(200).json({
                 message: e,
                 success: false
@@ -76,3 +76,96 @@ export const deleteQuestion = (req, res) => {
         }
     });
 }
+
+export const getAllQuestion = async (req, res) => {
+    res.json(await Question.find().populate('userID', ['username']));
+};
+
+export const upvote = async (req, res) => {
+
+    const id = req.params.id;
+    try {
+        const PostDoc = await Question.findById(id);
+
+        if (!PostDoc) {
+            return res.status(404).json({
+                message: "Question not found",
+                success: false
+            });
+        }
+        PostDoc.upvotes += 1;
+
+        await PostDoc.save();
+        res.json({
+            message: "Upvoted successfully",
+            success: true
+        });
+    }
+    catch (e) {
+        res.status(500).json({
+            message: e,
+            success: false
+        });
+    }
+};
+
+export const downvote = async (req, res) => {
+
+    const id = req.params.id;
+    try {
+        const PostDoc = await Question.findById(id);
+
+        if (!PostDoc) {
+            return res.status(404).json({
+                message: "Question not found",
+                success: false
+            });
+        }
+        PostDoc.downvotes += 1;
+
+        await PostDoc.save();
+        res.json({
+            message: "Downvoted successfully",
+            success: true
+        });
+    }
+    catch (e) {
+        res.status(500).json({
+            message: e,
+            success: false
+        });
+    }
+};
+
+export const addComment = async (req, res) => {
+    const id = req.params.id;
+    const { comment } = req.body;
+
+    const PostDoc = await Question.findById(id);
+
+    if (!PostDoc) {
+        return res.status(404).json({
+            message: "Question not found",
+            success: false
+        });
+    }
+
+    try {
+        await Question.findOneAndUpdate({ _id: id },
+            { $push: { comments: comment } },
+            { new: true }
+        )
+
+        res.status(200).json({
+            message: "Comment added Successfully",
+            success: true,
+            data: PostDoc
+        });
+    } catch (e) {
+        res.status(500).json({
+            message: e,
+            success: false
+        });
+    }
+};
+
