@@ -26,16 +26,31 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
     const { username, password } = req.body;
 
-    const UserDoc = await User.findOne({ username });
+    try {
+        const userDoc = await User.findOne({ username });
 
-    const passOk = bcrypt.compareSync(password, UserDoc.password);
+        if (!userDoc) {
+            res.status(400).json({
+                message: "Invalid Credentials",
+                success: false
+            });
+            return;
+        }
 
-    if (passOk) {
-        sendCookie(UserDoc, res, username);
-    }
-    else {
-        res.status(400).json({
-            message: "Invalid Credentials",
+        const passOk = bcrypt.compareSync(password, userDoc.password);
+
+        if (passOk) {
+            sendCookie(userDoc, res, username);
+        }
+        else {
+            res.status(400).json({
+                message: "Invalid Credentials",
+                success: false
+            });
+        }
+    } catch (error) {
+        res.status(500).json({
+            message: "An error occurred",
             success: false
         });
     }
