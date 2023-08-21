@@ -1,6 +1,6 @@
 # Stack Over Flow Backend APIs
 
-render_link: https://stackoverflowclone-shipments.onrender.com
+render_link: https://stackoverflowclone-shipmnts.onrender.com
 
 #setup steps
 
